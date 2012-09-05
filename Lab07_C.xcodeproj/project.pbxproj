@@ -28,6 +28,7 @@
 		2E18C73A15E47875000EFF5C /* Lab07_C */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lab07_C; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E18C73E15E47875000EFF5C /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		2E18C74015E47875000EFF5C /* Lab07_C.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Lab07_C.1; sourceTree = "<group>"; };
+		2EBC6E2515F6EF0300139B5D /* tree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tree.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				2E18C73E15E47875000EFF5C /* main.c */,
+				2EBC6E2515F6EF0300139B5D /* tree.c */,
 				2E18C74015E47875000EFF5C /* Lab07_C.1 */,
 			);
 			path = Lab07_C;
@@ -203,6 +205,7 @@
 				2E18C74615E47875000EFF5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
