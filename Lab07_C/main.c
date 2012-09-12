@@ -12,7 +12,6 @@
 #include <math.h>
 
 typedef struct node node;
-/* typedef struct tree tree; */
 
 struct node {
     struct node *parent;
@@ -22,11 +21,6 @@ struct node {
     int *characterisitics;
     int index;
 };
-
-/* struct tree {
-    node *root;
-    int numberOfLeaves;
-}; */
 
 void *emalloc(size_t s)
 {
@@ -38,15 +32,30 @@ void *emalloc(size_t s)
     return result;
 }
 
-/* tree treeInit(int size) {
+/* Prints the tree in Newick format */
+int print_newick(node start){
+    if (start.child1){
+        printf("(");
+        print_newick(*start.child1);
+        printf(",");
+        print_newick(*start.child2);
+        printf(")");
+    }else{
+        printf("%d", start.key);
+    }
     
-}*/
+    if (!(start.parent))
+        printf("\n");
+    
+    return 0;
+}
 
 int main(int argc, const char * argv[])
 {
     node *tree;
-    int i, leaves, nodes, rand, otus, htus;
+    int i, swap, leaves, nodes, rand, otus, htus;
     int *usedIndices;
+    int *randomKeys;
     
     /* Get tree size */
     if (argc != 2) {
@@ -65,6 +74,23 @@ int main(int argc, const char * argv[])
         tree[i].child2 = NULL;
         usedIndices[i] = 0;
     }
+    
+    /* Create a set of random keys */
+    randomKeys = emalloc(leaves * sizeof randomKeys[0]);
+    for (i = 0; i < leaves; i++) {
+        randomKeys[i] = i;
+    }
+    /* Shuffle */
+    for (i = leaves - 1; i > 0; i--) {
+        rand = arc4random_uniform(i);
+        swap = randomKeys[i];
+        randomKeys[i] = randomKeys[rand];
+        randomKeys[rand] = swap;
+    }
+    for (i = 0; i < leaves; i++) {
+        fprintf(stderr, "%i, ", randomKeys[i]);
+    }
+    fprintf(stderr, "\n");
 
     /* Initialise Root */
     usedIndices[0] = 1;
@@ -83,6 +109,8 @@ int main(int argc, const char * argv[])
         fprintf(stderr, "%i\n", rand);
         /* Make this insertion point the parent of the new node */
         tree[i].parent = &tree[rand];
+        tree[i].index = i;
+        tree[i].key = randomKeys[i - leaves];
         /* Leaves do not have children */
         tree[i].child1 = NULL;
         tree[i].child2 = NULL;
@@ -99,11 +127,17 @@ int main(int argc, const char * argv[])
             usedIndices[htus] = 1;
             htus++;
         }
-        tree[i].index = i;
-        tree[i].key = arc4random_uniform(leaves);
+        
         otus++;
     }
+    print_newick(tree[0]);
+    fprintf(stderr, "OTU's : %i\n", otus);
+    fprintf(stderr, "HTU's : %i\n", htus);
     
+    /* Deallocacte */
+    free(tree);
+    free(usedIndices);
+    free(randomKeys);
     
     return EXIT_SUCCESS;
 }
