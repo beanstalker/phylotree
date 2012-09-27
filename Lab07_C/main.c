@@ -11,12 +11,12 @@
 #include <string.h>
 #include <math.h>
 
-typedef struct node node;
+typedef struct phylonode *node;
 
-struct node {
-    struct node *parent;
-    struct node *child1;
-    struct node *child2;
+struct phylonode {
+    node parent;
+    node child1;
+    node child2;
     int key;
     int *characterisitics;
     int index;
@@ -33,7 +33,7 @@ void *emalloc(size_t s)
 }
 
 /* Prints the tree in Newick format */
-int print_newick(node *start){
+int print_newick(node start){
     if (start->child1 != NULL){
         printf("(");
         print_newick(start->child1);
@@ -45,15 +45,16 @@ int print_newick(node *start){
     }
     
     if (start->parent == NULL) {
-        printf("[%i]", start->index);
-        printf("X");
+        /* printf("[%i]", start->index);
+        printf("X"); */
+        printf("\n");
     }
     return 0;
 }
 
 int main(int argc, const char * argv[])
 {
-    node *tree;
+    node tree;
     int i, swap, leaves, nodes, rand, otus, htus;
     int *usedIndices;
     int *randomKeys;
@@ -64,7 +65,7 @@ int main(int argc, const char * argv[])
         exit(EXIT_FAILURE);
     }
     leaves = atoi(argv[1]);
-    nodes = leaves + leaves - 1;
+    nodes = 2 * leaves - 1;
     
     /* Allocate and initialise to zero */
     tree = emalloc(nodes * sizeof(tree[0]));
@@ -73,6 +74,7 @@ int main(int argc, const char * argv[])
         tree[i].parent = NULL;
         tree[i].child1 = NULL;
         tree[i].child2 = NULL;
+        tree[i].key = -1;
         usedIndices[i] = 0;
     }
     
@@ -82,7 +84,7 @@ int main(int argc, const char * argv[])
         randomKeys[i] = i;
     }
     /* Shuffle */
-    /* for (i = leaves - 1; i > 0; i--) {
+    for (i = leaves - 1; i > 0; i--) {
         rand = arc4random_uniform(i);
         swap = randomKeys[i];
         randomKeys[i] = randomKeys[rand];
@@ -91,7 +93,7 @@ int main(int argc, const char * argv[])
     for (i = 0; i < leaves; i++) {
         fprintf(stderr, "%i, ", randomKeys[i]);
     }
-    fprintf(stderr, "\n"); */
+    fprintf(stderr, "\n");
 
     /* Initialise Root */
     usedIndices[0] = 1;
@@ -104,7 +106,7 @@ int main(int argc, const char * argv[])
     
     /* Fill the tree */
     /* The array is set up with the root follwed by all htus first, then the leaves */
-    for (i = leaves; i <= nodes; i++) {
+    for (i = leaves - 1; i < nodes; i++) {
         /* Find a random real insertion point (an htu) */
         rand = arc4random_uniform(leaves);
         while (!usedIndices[rand]) {
@@ -114,7 +116,7 @@ int main(int argc, const char * argv[])
         /* fprintf(stderr, "%i\n", rand); */
         /* Make this insertion point the parent of the new node */
         tree[i].parent = &tree[rand];
-        fprintf(stderr, "%i\n", (tree[i].parent == NULL ? 0 : 1));
+        /* fprintf(stderr, "%i\n", (tree[i].parent == NULL ? 0 : 1)); */
         tree[i].index = i;
         tree[i].key = randomKeys[i - leaves];
         /* Leaves do not have children */
@@ -130,7 +132,8 @@ int main(int argc, const char * argv[])
             tree[rand].child1 = &tree[htus];
             tree[htus].child2 = &tree[i];
             tree[i].parent = &tree[htus];
-            fprintf(stderr, "%i\n", (tree[i].parent == NULL ? 0 : 1));
+            tree[htus].parent = &tree[rand];
+            /* fprintf(stderr, "%i\n", (tree[i].parent == NULL ? 0 : 1)); */
             usedIndices[htus] = 1;
             htus++;
         }
@@ -138,11 +141,12 @@ int main(int argc, const char * argv[])
         otus++;
     }
     
-    for (i = 1; i < nodes; i++) {
+    for (i = 0; i < nodes; i++) {
         fprintf(stderr, "%i\n", (tree+i)->index);
     }
     
-    print_newick(&tree[0]);
+    print_newick(tree);
+    
     fprintf(stderr, "OTU's : %i\n", otus);
     fprintf(stderr, "HTU's : %i\n", htus);
     
